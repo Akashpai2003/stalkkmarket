@@ -645,77 +645,86 @@ function App() {
       setLoadingElapsedTime(parseFloat(((Date.now() - startTime) / 1000).toFixed(1)))
     }, 100) : null
 
-    try {
-      // Parallelize boot API requests to ensure rapid load times under 3s
-      const fetchPromises = [
-        fetch("/api/market/overview")
-          .then(async r => {
-            if (!r.ok) throw new Error("Overview API failed");
-            const data = await r.json();
-            setMarketOverview(data);
-            if (!isSilent) setLoadingSteps(s => ({ ...s, overview: "success" }));
-          })
-          .catch(err => {
-            if (!isSilent) setLoadingSteps(s => ({ ...s, overview: "failed" }));
-            throw err;
-          }),
-        fetch("/api/market/opportunities-v2")
-          .then(async r => {
-            if (!r.ok) throw new Error("Opportunities API failed");
-            const data = await r.json();
-            setOpportunities(data);
-            if (!isSilent) setLoadingSteps(s => ({ ...s, opportunities: "success" }));
-          })
-          .catch(err => {
-            if (!isSilent) setLoadingSteps(s => ({ ...s, opportunities: "failed" }));
-            throw err;
-          }),
-        fetch("/api/portfolio/stats")
-          .then(async r => {
-            if (!r.ok) throw new Error("Portfolio API failed");
-            const data = await r.json();
-            setPortfolioStats(data);
-            if (!isSilent) setLoadingSteps(s => ({ ...s, portfolio: "success" }));
-          })
-          .catch(err => {
-            if (!isSilent) setLoadingSteps(s => ({ ...s, portfolio: "failed" }));
-            throw err;
-          }),
-        fetch("/api/auth/status")
-          .then(async r => {
-            if (!r.ok) throw new Error("Auth Status API failed");
-            const data = await r.json();
-            setAuthStatus(data);
-            if (data.device_id) setAuthDeviceId(data.device_id);
-            if (!isSilent) setLoadingSteps(s => ({ ...s, auth: "success" }));
-          })
-          .catch(err => {
-            if (!isSilent) setLoadingSteps(s => ({ ...s, auth: "failed" }));
-            throw err;
-          }),
-        fetch("/api/playbook/list")
-          .then(async r => {
-            if (!r.ok) throw new Error("Playbook List API failed");
-            const data = await r.json();
-            setPlaybookStats(data);
-            if (!isSilent) setLoadingSteps(s => ({ ...s, playbook: "success" }));
-          })
-          .catch(err => {
-            if (!isSilent) setLoadingSteps(s => ({ ...s, playbook: "failed" }));
-            throw err;
-          })
-      ];
+    const API_BASE = "https://stalkkmarket.onrender.com"
 
-      await Promise.all(fetchPromises);
-      setOfflineMode(false);
+    const fetchWithRetry = async (endpoint: string, retries = 3): Promise<any> => {
+      let lastErr: any = null
+      for (let i = 0; i < retries; i++) {
+        try {
+          const url = i === 0 ? endpoint : `${API_BASE}${endpoint}`
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 12000)
+          const res = await fetch(url, { signal: controller.signal })
+          clearTimeout(timeoutId)
+          if (res.ok) return await res.json()
+        } catch (err) {
+          lastErr = err
+          if (i < retries - 1) await new Promise((r) => setTimeout(r, 2500))
+        }
+      }
+      throw lastErr || new Error(`Fetch failed for ${endpoint}`)
+    }
+
+    try {
+      const fetchPromises = [
+        fetchWithRetry("/api/market/overview")
+          .then((data) => {
+            setMarketOverview(data)
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, overview: "success" }))
+          })
+          .catch((err) => {
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, overview: "failed" }))
+            throw err
+          }),
+        fetchWithRetry("/api/market/opportunities-v2")
+          .then((data) => {
+            setOpportunities(data)
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, opportunities: "success" }))
+          })
+          .catch((err) => {
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, opportunities: "failed" }))
+            throw err
+          }),
+        fetchWithRetry("/api/portfolio/stats")
+          .then((data) => {
+            setPortfolioStats(data)
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, portfolio: "success" }))
+          })
+          .catch((err) => {
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, portfolio: "failed" }))
+            throw err
+          }),
+        fetchWithRetry("/api/auth/status")
+          .then((data) => {
+            setAuthStatus(data)
+            if (data.device_id) setAuthDeviceId(data.device_id)
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, auth: "success" }))
+          })
+          .catch((err) => {
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, auth: "failed" }))
+            throw err
+          }),
+        fetchWithRetry("/api/playbook/list")
+          .then((data) => {
+            setPlaybookStats(data)
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, playbook: "success" }))
+          })
+          .catch((err) => {
+            if (!isSilent) setLoadingSteps((s) => ({ ...s, playbook: "failed" }));
+            throw err
+          })
+      ]
+
+      await Promise.all(fetchPromises)
+      setOfflineMode(false)
     } catch (e: any) {
-      console.error("Failed to load dashboard data. Check backend uvicorn servers.", e);
+      console.error("Connection attempt failed. Re-trying or falling back.", e)
       if (!isSilent) {
-        setLoadingError("Unable to establish connection to the backend server. Please ensure the FastAPI uvicorn backend service is running and accessible.");
+        setLoadingError("Unable to establish connection to the backend server. Please ensure the FastAPI uvicorn backend service is running and accessible.")
       }
     } finally {
-      if (timer) clearInterval(timer);
-      if (!isSilent) setLoading(false);
+      if (timer) clearInterval(timer)
+      if (!isSilent) setLoading(false)
     }
   }
 
