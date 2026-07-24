@@ -5,7 +5,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "http://127.0.0.1:8000/api/:splat"
+  to = "https://stalkkmarket.onrender.com/api/:splat"
   status = 200
 
 [[redirects]]
