@@ -1,0 +1,552 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist", Consolas, "Courier New", monospace; /* Fallback to Geist as default font */
+
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-foreground: var(--foreground);
+  --color-text-muted: var(--text-muted);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-border-hover: var(--border-hover);
+  --color-input: var(--input);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-chat-bg: var(--chat-bg);
+  --color-chat-bg-secondary: var(--chat-bg-secondary);
+  --color-chat-bg-tertiary: var(--chat-bg-tertiary);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-success: var(--success);
+  --color-success-dark: var(--success-dark);
+  --color-warning: var(--warning);
+  
+  --radius-card: 18px;
+  --radius-input: 14px;
+  --radius-button: 14px;
+  --radius-pill: 9999px;
+  
+  /* Map Tailwind radius utilities to maintain consistency */
+  --radius-2xl: 20px;
+  --radius-xl: 18px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+
+  /* Refined Typography Sizing Hierarchy */
+  --font-size-2xs: 0.6875rem; /* 11px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.8125rem; /* 13px */
+  --font-size-base: 0.875rem; /* 14px */
+  --font-size-lg: 1rem; /* 16px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
+  --font-size-5xl: 3rem; /* 48px */
+}
+
+:root {
+  /* Design Tokens - Premium Light Mode Design System */
+  --background: #F4F6F9; /* Soft neutral page background */
+  --background-secondary: #EBEEF2; /* Slightly deeper for sidebars */
+  --foreground: #0F172A; /* Deep slate dark text */
+  --text-muted: #64748B; /* Slate muted text */
+  --text-tertiary: #94A3B8;
+  --border: #DEE3EA; /* Clean neutral border */
+  --border-hover: #CBD5E1;
+  --primary: #0F172A;
+  --primary-foreground: #FFFFFF;
+  --card: #FFFFFF; /* Pure white card surface */
+  --card-hover: #F8FAFC;
+  --card-interactive: #F1F5F9;
+  --input: #FFFFFF;
+  --accent: #EFF2F6;
+  --accent-foreground: #0F172A;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --success: #10B981;
+  --success-dark: #059669;
+  --warning: #F59E0B;
+  --chat-bg: #FFFFFF;
+  --chat-bg-secondary: #F4F6F9;
+  --chat-bg-tertiary: #EBEEF2;
+}
+
+.dark {
+  /* JSON Design System Monochrome Tokens */
+  --background: #080909; /* Deep dark black main content background */
+  --background-secondary: #121316; /* Lighter elevated dark surface for sidebars & headers */
+  --foreground: #F2F2F0;
+  --text-muted: #A3A5A3;
+  --text-tertiary: #717471;
+  --border: rgba(255, 255, 255, 0.09); /* Thin low contrast separator */
+  --border-hover: rgba(255, 255, 255, 0.14);
+  --primary: #F2F2F0;
+  --primary-foreground: #080909;
+  
+  --card: #101112; /* Subtle dark charcoal inner container surface */
+  --card-hover: #151617;
+  --card-interactive: #121314;
+  --input: #080909;
+  --accent: #121314;
+  --accent-foreground: #F2F2F0;
+  
+  /* Restrained Financial Meaning Colors */
+  --accent-cyan: #2DD4BF;
+  --accent-emerald: #34D399;
+  
+  --destructive: #F05252;
+  --destructive-foreground: #FFFFFF;
+  --success: #34D399;
+  --success-dark: #059669;
+  --warning: #F59E42;
+  --chat-bg: #1A1D23;
+  --chat-bg-secondary: #1E2229;
+  --chat-bg-tertiary: #22262E;
+}
+
+/* Glassmorphism & Structured Surface Helper */
+.glass-card {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-card) !important;
+}
+
+.cyan-glow-hover {
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+.cyan-glow-hover:hover {
+  border-color: rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.1) !important;
+}
+
+/* Completely Hide Visible Scrollbars while retaining scroll functionality */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+* {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+/* Icons — Phosphor Icons weight Regular/15px size */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+select, option {
+  font-family: "Geist", sans-serif;
+}
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  transition: background-color 150ms ease, color 150ms ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings with Display Font and restricted weights */
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-2xl);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--foreground);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+p, span, div, button, input, select, textarea {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Global Transition Utility */
+.transition-all-custom {
+  transition: all 150ms ease;
+}
+
+/* Card Class Styling */
+.card-custom {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 1.5rem 1.25rem; /* Increased vertical breathing room */
+  transition: background-color 180ms ease-in-out, border-color 180ms ease-in-out, transform 180ms ease-in-out, box-shadow 180ms ease-in-out;
+}
+
+/* Specific Opportunity Card Styling */
+.opportunity-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.opportunity-card:hover {
+  background-color: var(--card-hover);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+.opportunity-card:focus-visible {
+  outline: none;
+  border-color: var(--foreground);
+}
+
+/* Button Component Standards */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: var(--font-size-xs);
+  transition: background-color 150ms ease, opacity 150ms ease;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  text-decoration: none;
+  border-radius: var(--radius-button);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background-color: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--accent);
+}
+
+.btn-accent {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--border);
+}
+.btn-accent:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-destructive {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+.btn-destructive:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* Button Size standards matching 36px (md) and 32px (sm) */
+.btn-md {
+  height: 2.75rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.btn-sm {
+  height: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.btn-lg {
+  height: 3rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Input Styles */
+.input-md {
+  height: 2.75rem;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  transition: border-color 150ms ease;
+  width: 100%;
+}
+.input-md:focus {
+  border-color: var(--text-muted);
+  outline: none;
+}
+.input-md:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dropdown Standard Sizing */
+.select-md {
+  height: 2.75rem;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  padding-left: 1rem;
+  padding-right: 1.75rem;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease;
+}
+.select-md:hover {
+  background-color: var(--accent);
+}
+
+.select-sm {
+  height: 2rem;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  padding-left: 0.75rem;
+  padding-right: 1.75rem;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease;
+}
+.select-sm:hover {
+  background-color: var(--accent);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+.dark ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.app-shell {
+  min-width: 0;
+}
+
+.app-shell main,
+.app-shell aside {
+  min-width: 0;
+}
+
+/* Responsive grid layout queries for terminal/trading dashboards */
+@media (max-width: 900px) {
+  .app-shell {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+
+  .app-shell > aside {
+    width: 100%;
+    max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .app-shell > main {
+    height: auto;
+    min-height: 0;
+  }
+
+  .app-shell header {
+    height: auto;
+    min-height: 64px;
+    padding: 12px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .app-shell header > div:first-child {
+    width: 100%;
+  }
+
+  .app-shell main > div.flex-1 {
+    padding: 16px;
+  }
+}
+
+@keyframes ai-blob-morph {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: rotate(0deg) translate(0px, 0px) scale(1);
+  }
+  25% {
+    border-radius: 40% 60% 50% 50% / 50% 60% 40% 50%;
+    transform: rotate(90deg) translate(-2px, 3px) scale(1.08);
+  }
+  50% {
+    border-radius: 35% 65% 45% 55% / 55% 40% 60% 45%;
+    transform: rotate(180deg) translate(3px, -2px) scale(0.92);
+  }
+  75% {
+    border-radius: 55% 45% 65% 35% / 40% 55% 45% 60%;
+    transform: rotate(270deg) translate(-1px, -3px) scale(1.05);
+  }
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: rotate(360deg) translate(0px, 0px) scale(1);
+  }
+}
+
+.ai-organic-blob {
+  position: relative;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 60%),
+              conic-gradient(from 45deg, #fbbf24, #f59e0b, #92400e, #f59e0b, #fbbf24);
+  animation: ai-blob-morph 6s ease-in-out infinite alternate;
+  filter: blur(0.5px);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  box-shadow: 
+    inset -6px -6px 12px rgba(255, 255, 255, 0.15),
+    inset 6px 6px 12px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(251, 191, 36, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* Small grayscale AI blob for message labels */
+.ai-blob-label {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 60%),
+              conic-gradient(from 45deg, #fbbf24, #f59e0b, #92400e, #f59e0b, #fbbf24);
+  animation: ai-blob-morph 6s ease-in-out infinite alternate;
+  filter: blur(0.3px);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  box-shadow: 
+    inset -2px -2px 4px rgba(255, 255, 255, 0.1),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.35),
+    0 0 6px rgba(251, 191, 36, 0.06);
+  flex-shrink: 0;
+}
+
+/* Research Assistant ambient gradient background (spans entire drawer including search bar) */
+.ra-ambient {
+  position: relative;
+  overflow: hidden;
+}
+
+.ra-ambient::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  background: 
+    radial-gradient(ellipse 100% 75% at 50% 100%, 
+      rgba(52, 211, 153, 0.75) 0%, 
+      rgba(16, 185, 129, 0.50) 30%, 
+      rgba(5, 150, 105, 0.25) 55%, 
+      rgba(4, 120, 87, 0.08) 80%, 
+      transparent 100%
+    );
+  filter: blur(18px);
+  animation: ra-gradient-drift 8s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes ra-gradient-drift {
+  0% {
+    opacity: 0.92;
+    transform: scale(1) translateY(0px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03) translateY(-2px);
+  }
+  100% {
+    opacity: 0.95;
+    transform: scale(0.98) translateY(1px);
+  }
+}
+
+/* Light mode: remove all gradients */
+:root:not(.dark) [class*="bg-gradient"] {
+  background-image: none !important;
+}
+
+/* Light mode: adjust ra-ambient glow to be more subtle */
+:root:not(.dark) .ra-ambient::before {
+  opacity: 0.25 !important;
+  background: radial-gradient(ellipse 100% 75% at 50% 100%, 
+    rgba(16, 185, 129, 0.30) 0%, 
+    transparent 100%
+  ) !important;
+}
+
+/* Light mode: soften cyan glow */
+:root:not(.dark) .cyan-glow-hover:hover {
+  border-color: rgba(6, 182, 212, 0.15) !important;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.05) !important;
+}

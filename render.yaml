@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: stalk-market-backend
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r app/backend/requirements.txt
+    startCommand: cd app/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 10000

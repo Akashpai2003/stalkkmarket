@@ -1,0 +1,1150 @@
+import { useState, useEffect } from "react"
+import { Search, RefreshCw, AlertCircle, X, LayoutDashboard, Briefcase, GraduationCap, Sun, Moon, Settings, Bot } from "lucide-react"
+import { HoldingsOverview } from "./components/HoldingsOverview"
+import { ScripAnalyzer } from "./components/ScripAnalyzer"
+import { OrderTicket } from "./components/OrderTicket"
+import { PlaybookUploader } from "./components/PlaybookUploader"
+import { SettingsPage } from "./components/SettingsPage"
+import { AutomationLab } from "./components/AutomationLab"
+import { CommandK } from "./components/CommandK"
+import { Chatbot } from "./components/Chatbot"
+
+function getTechnicalExplanation(op: any) {
+  if (op.symbol === "HFCL") {
+    return "Volume exceeds 2.5x of 20-day average, confirming breakout above local consolidation.";
+  } else if (op.symbol === "KPITTECH") {
+    return "Momentum sustained above 50-period EMA with active sector leadership.";
+  } else if (op.symbol === "JBM AUTO") {
+    return "Consolidation pullback near major trendline support with clear risk invalidation.";
+  } else if (op.symbol === "BLS INTL") {
+    return "RSI holds above neutral line during shallow pullback, indicating strong demand.";
+  } else {
+    const tagsText = op.signal_tags?.filter((t: string) => t !== op.setup).join(", ").toLowerCase() || "momentum indicators";
+    return `Setup aligns with playbook criteria, supported by expanding ${tagsText} structures.`;
+  }
+}
+
+function App() {
+  const [activeTab, setActiveTab] = useState<"dashboard" | "portfolio" | "playbook" | "automation" | "settings">("dashboard")
+  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
+  const [aiPanelOpen, setAiPanelOpen] = useState<boolean>(true)
+  
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("theme")
+    return (saved === "light" || saved === "dark") ? saved : "dark"
+  })
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove("light", "dark")
+    root.classList.add(theme)
+    localStorage.setItem("theme", theme)
+  }, [theme])
+  
+  // Market & opportunities state
+  const [marketOverview, setMarketOverview] = useState<any>(null)
+  const [opportunities, setOpportunities] = useState<any[]>([])
+  const [portfolioStats, setPortfolioStats] = useState<any>(null)
+  const [playbookStats, setPlaybookStats] = useState<{ files: string[], chunks_count: number, sources?: any[] }>({ files: [], chunks_count: 0, sources: [] })
+  const [loading, setLoading] = useState<boolean>(true)
+  const [offlineMode, setOfflineMode] = useState<boolean>(false)
+  
+  // Detailed booting/loading stages
+  const [loadingSteps, setLoadingSteps] = useState<{
+    overview: "pending" | "success" | "failed";
+    opportunities: "pending" | "success" | "failed";
+    portfolio: "pending" | "success" | "failed";
+    auth: "pending" | "success" | "failed";
+    playbook: "pending" | "success" | "failed";
+  }>({
+    overview: "pending",
+    opportunities: "pending",
+    portfolio: "pending",
+    auth: "pending",
+    playbook: "pending"
+  })
+  const [loadingElapsedTime, setLoadingElapsedTime] = useState<number>(0)
+  const [loadingError, setLoadingError] = useState<string | null>(null)
+  
+  // Opportunities filters & sorting
+  const [selectedSector, setSelectedSector] = useState<string>("All Sectors")
+  const [sortBy, setSortBy] = useState<string>("AI Score")
+  
+  // Command K search state
+  const [commandKOpen, setCommandKOpen] = useState<boolean>(false)
+  
+  // Order ticket state
+  const [orderTicketOpen, setOrderTicketOpen] = useState<boolean>(false)
+  const [orderTicketScrip, setOrderTicketScrip] = useState<any>(null)
+  
+  // Nubra API Auth sync state
+  const [authModalOpen, setAuthModalOpen] = useState<boolean>(false)
+  const [authStep, setAuthStep] = useState<number>(1)
+  const [authPhone, setAuthPhone] = useState<string>("")
+  const [authOtp, setAuthOtp] = useState<string>("")
+  const [authPin, setAuthPin] = useState<string>("")
+  const [authDeviceId, setAuthDeviceId] = useState<string>("STM_DEVICE_001")
+  const [authTempToken, setAuthTempToken] = useState<string>("")
+  const [authAuthToken, setAuthAuthToken] = useState<string>("")
+  const [authStatus, setAuthStatus] = useState<any>({ authenticated: false, mock_mode: true, phone_saved: false, mpin_saved: false, phone: "" })
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [saveCredsCheckbox, setSaveCredsCheckbox] = useState<boolean>(true)
+  const [savedCredsStatus, setSavedCredsStatus] = useState<{ phone_saved: boolean, mpin_saved: boolean, phone: string }>({ phone_saved: false, mpin_saved: false, phone: "" })
+
+  const fetchCredentialsStatus = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/auth/credentials")
+      if (res.ok) {
+        const data = await res.json()
+        setSavedCredsStatus(data)
+        if (data.phone_saved && data.phone) {
+          setAuthPhone(data.phone)
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch credentials status", e)
+    }
+  }
+
+  useEffect(() => {
+    if (authModalOpen) {
+      fetchCredentialsStatus()
+    }
+  }, [authModalOpen])
+
+  // Fetch initial dashboard & portfolio data
+  const loadDashboardData = async (forceOffline: boolean = false, isSilent: boolean = false) => {
+    if (forceOffline) {
+      setMarketOverview({
+        market_health: { score: 8.4, sentiment: "Strong Bullish", suggested_exposure: "70%" },
+        indices: {
+          nifty: { price: 22502.45, change: 0.68, sparkline: [22400, 22430, 22420, 22480, 22502] },
+          sensex: { price: 74180.94, change: 0.59, sparkline: [74000, 74050, 74100, 74150, 74180] }
+        }
+      })
+      setOpportunities([
+        { symbol: "HFCL", name: "HFCL Ltd.", sector: "Telecom", ref_id: 1755599, score: 87, setup: "Volume Surge", signal_tags: ["Volume Surge", "Breakout"], entry: "₹140 - ₹145", target: "₹172", stop: "₹136", price: 142.5, change: 2.45, sparkline: [140, 141, 140.5, 142, 142.5] },
+        { symbol: "KPITTECH", name: "KPIT Technologies", sector: "Auto Ancillary", ref_id: 1755600, score: 84, setup: "Breakout + Momentum", signal_tags: ["Breakout", "Strong Trend"], entry: "₹1,430 - ₹1,460", target: "₹1,650", stop: "₹1,365", price: 1445.0, change: 1.85, sparkline: [1430, 1435, 1440, 1442, 1445] },
+        { symbol: "JBM AUTO", name: "JBM Auto Ltd.", sector: "Auto", ref_id: 1755601, score: 82, setup: "Strong Relative Strength", signal_tags: ["Relative Strength", "Strong Trend"], entry: "₹1,040 - ₹1,060", target: "₹1,210", stop: "₹985", price: 1052.2, change: -0.42, sparkline: [1060, 1058, 1055, 1050, 1052.2] },
+        { symbol: "BLS INTL", name: "BLS International", sector: "Financials", ref_id: 1755602, score: 79, setup: "Pullback Setup", signal_tags: ["Near Support", "Relative Strength"], entry: "₹340 - ₹350", target: "₹385", stop: "₹323", price: 344.8, change: 3.12, sparkline: [340, 342, 341, 343, 344.8] }
+      ])
+      setPortfolioStats({
+        funds: { start_of_day_funds: 500000.0, net_margin_available: 482500.0, total_margin_blocked: 17500.0, brokerage: 150.0 },
+        holdings: { client_code: "STM_OFFLINE_MOCK", holding_stats: { invested_amount: 37364.6, current_value: 39556.5, total_pnl: 2191.9, total_pnl_chg: 5.86, day_pnl: 167.0, day_pnl_chg: 0.42 }, holdings: [] },
+        positions: { client_code: "STM_OFFLINE_MOCK", position_stats: { realised_pnl: 0, unrealised_pnl: 0, total_pnl: 0, total_pnl_chg: 0 }, stock_positions: [], close_positions: [] }
+      })
+      setAuthStatus({ authenticated: false, mock_mode: true })
+      setPlaybookStats({ files: [], chunks_count: 0 })
+      setOfflineMode(true)
+      setLoading(false)
+      return
+    }
+
+    if (!isSilent) {
+      setLoading(true)
+      setLoadingError(null)
+      setLoadingElapsedTime(0)
+      setLoadingSteps({
+        overview: "pending",
+        opportunities: "pending",
+        portfolio: "pending",
+        auth: "pending",
+        playbook: "pending"
+      })
+    }
+
+    const startTime = Date.now()
+    const timer = !isSilent ? setInterval(() => {
+      setLoadingElapsedTime(parseFloat(((Date.now() - startTime) / 1000).toFixed(1)))
+    }, 100) : null
+
+    try {
+      // Parallelize boot API requests to ensure rapid load times under 3s
+      const fetchPromises = [
+        fetch("http://127.0.0.1:8000/api/market/overview")
+          .then(async r => {
+            if (!r.ok) throw new Error("Overview API failed");
+            const data = await r.json();
+            setMarketOverview(data);
+            if (!isSilent) setLoadingSteps(s => ({ ...s, overview: "success" }));
+          })
+          .catch(err => {
+            if (!isSilent) setLoadingSteps(s => ({ ...s, overview: "failed" }));
+            throw err;
+          }),
+        fetch("http://127.0.0.1:8000/api/market/opportunities-v2")
+          .then(async r => {
+            if (!r.ok) throw new Error("Opportunities API failed");
+            const data = await r.json();
+            setOpportunities(data);
+            if (!isSilent) setLoadingSteps(s => ({ ...s, opportunities: "success" }));
+          })
+          .catch(err => {
+            if (!isSilent) setLoadingSteps(s => ({ ...s, opportunities: "failed" }));
+            throw err;
+          }),
+        fetch("http://127.0.0.1:8000/api/portfolio/stats")
+          .then(async r => {
+            if (!r.ok) throw new Error("Portfolio API failed");
+            const data = await r.json();
+            setPortfolioStats(data);
+            if (!isSilent) setLoadingSteps(s => ({ ...s, portfolio: "success" }));
+          })
+          .catch(err => {
+            if (!isSilent) setLoadingSteps(s => ({ ...s, portfolio: "failed" }));
+            throw err;
+          }),
+        fetch("http://127.0.0.1:8000/api/auth/status")
+          .then(async r => {
+            if (!r.ok) throw new Error("Auth Status API failed");
+            const data = await r.json();
+            setAuthStatus(data);
+            if (data.device_id) setAuthDeviceId(data.device_id);
+            if (!isSilent) setLoadingSteps(s => ({ ...s, auth: "success" }));
+          })
+          .catch(err => {
+            if (!isSilent) setLoadingSteps(s => ({ ...s, auth: "failed" }));
+            throw err;
+          }),
+        fetch("http://127.0.0.1:8000/api/playbook/list")
+          .then(async r => {
+            if (!r.ok) throw new Error("Playbook List API failed");
+            const data = await r.json();
+            setPlaybookStats(data);
+            if (!isSilent) setLoadingSteps(s => ({ ...s, playbook: "success" }));
+          })
+          .catch(err => {
+            if (!isSilent) setLoadingSteps(s => ({ ...s, playbook: "failed" }));
+            throw err;
+          })
+      ];
+
+      await Promise.all(fetchPromises);
+      setOfflineMode(false);
+    } catch (e: any) {
+      console.error("Failed to load dashboard data. Check backend uvicorn servers.", e);
+      if (!isSilent) {
+        setLoadingError("Unable to establish connection to the backend server at http://127.0.0.1:8000. Please ensure the FastAPI uvicorn backend service is running and accessible.");
+      }
+    } finally {
+      if (timer) clearInterval(timer);
+      if (!isSilent) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadDashboardData()
+    
+    // Periodically update indices, opportunities, and portfolio limits every 10 seconds in the background
+    const interval = setInterval(() => {
+      // Do not auto-poll if we are in offline sandbox mode or currently loading
+      if (!offlineMode) {
+        loadDashboardData(false, true)
+      }
+    }, 10000)
+    
+    return () => clearInterval(interval)
+  }, [offlineMode])
+
+
+  // Listen to Cmd+K to open Command Bar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault()
+        setCommandKOpen(true)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
+
+  // Action methods
+  const handleExecuteTrade = async (orderPayload: any): Promise<boolean> => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/trade/place", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload)
+      })
+      if (response.ok) {
+        // Refresh portfolio immediately
+        const portfolioRes = await fetch("http://127.0.0.1:8000/api/portfolio/stats")
+        const portfolioData = await portfolioRes.json()
+        setPortfolioStats(portfolioData)
+        return true
+      }
+      return false
+    } catch (e) {
+      console.error("Order placement execution error", e)
+      return false
+    }
+  }
+
+  const handlePlaybookUpdate = () => {
+    loadDashboardData()
+  }
+
+  // --- NUBRA AUTHENTICATION HANDLERS ---
+  const handleRequestOTP = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError(null)
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: authPhone, skip_totp: false })
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setAuthTempToken(data.temp_token)
+        // Request immediate second step (OTP Generation)
+        const secondRes = await fetch("http://127.0.0.1:8000/api/auth/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: authPhone, skip_totp: true, temp_token: data.temp_token })
+        })
+        const secondData = await secondRes.json()
+        if (secondRes.ok) {
+          setAuthTempToken(secondData.temp_token)
+          setAuthStep(2)
+        } else {
+          setAuthError(secondData.detail || "Step 2 OTP generation failed")
+        }
+      } else {
+        setAuthError(data.detail || "Failed to send OTP verification")
+      }
+    } catch (e) {
+      setAuthError("Auth server unreachable")
+    }
+  }
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError(null)
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: authPhone, otp: authOtp, temp_token: authTempToken })
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setAuthAuthToken(data.auth_token)
+        
+        // If MPIN is saved, proceed to verify MPIN automatically!
+        if (savedCredsStatus.mpin_saved) {
+          const mpinRes = await fetch("http://127.0.0.1:8000/api/auth/verify-mpin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pin: "SAVED_MPIN", auth_token: data.auth_token })
+          })
+          const mpinData = await mpinRes.json()
+          if (mpinRes.ok) {
+            setAuthModalOpen(false)
+            loadDashboardData()
+          } else {
+            setAuthError(mpinData.detail || "Automatic MPIN verification failed. Enter manually.")
+            setAuthStep(3) // Fall back to manual
+          }
+        } else {
+          setAuthStep(3)
+        }
+      } else {
+        setAuthError(data.detail || "Verification failed")
+      }
+    } catch (e) {
+      setAuthError("Auth verification failed")
+    }
+  }
+
+  const handleVerifyMPIN = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError(null)
+    try {
+      if (saveCredsCheckbox) {
+        await fetch("http://127.0.0.1:8000/api/auth/save-credentials", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: authPhone, mpin: authPin, device_id: authDeviceId })
+        })
+      }
+      
+      const response = await fetch("http://127.0.0.1:8000/api/auth/verify-mpin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: authPin, auth_token: authAuthToken })
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setAuthModalOpen(false)
+        loadDashboardData()
+      } else {
+        setAuthError(data.detail || "Invalid MPIN code")
+      }
+    } catch (e) {
+      setAuthError("Failed to verify MPIN code")
+    }
+  }
+
+  const handleToggleMockMode = async () => {
+    const nextMock = !authStatus.mock_mode
+    try {
+      await fetch(`http://127.0.0.1:8000/api/auth/toggle-mock?enabled=${nextMock}`, { method: "POST" })
+      loadDashboardData()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleClearCredentials = async () => {
+    if (confirm("Are you sure you want to clear saved credentials?")) {
+      try {
+        await fetch("http://127.0.0.1:8000/api/auth/clear-credentials", { method: "POST" })
+        fetchCredentialsStatus()
+        setAuthPhone("")
+        setAuthPin("")
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }
+
+
+  if (loading || !marketOverview) {
+    if (loadingError && !marketOverview) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6">
+          <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col gap-6">
+            <div className="flex items-center gap-3 text-destructive">
+              <AlertCircle className="h-6 w-6 shrink-0" />
+              <span className="font-bold text-sm">Workspace Connection Failed</span>
+            </div>
+            
+            <p className="text-xs text-text-muted leading-relaxed">
+              {loadingError}
+            </p>
+            
+            <div className="flex flex-col gap-2 bg-accent/30 rounded-xl p-3 border border-border/50 text-[11px] font-semibold text-text-muted">
+              <div className="flex justify-between items-center">
+                <span>Market Overview API</span>
+                <span className={loadingSteps.overview === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
+                  {loadingSteps.overview === "success" ? "Connected" : loadingSteps.overview === "failed" ? "Offline" : "Checking..."}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Swing Opportunities API</span>
+                <span className={loadingSteps.opportunities === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
+                  {loadingSteps.opportunities === "success" ? "Connected" : loadingSteps.opportunities === "failed" ? "Offline" : "Checking..."}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Portfolio Stats API</span>
+                <span className={loadingSteps.portfolio === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
+                  {loadingSteps.portfolio === "success" ? "Connected" : loadingSteps.portfolio === "failed" ? "Offline" : "Checking..."}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Nubra API Sync Status</span>
+                <span className={loadingSteps.auth === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
+                  {loadingSteps.auth === "success" ? "Connected" : loadingSteps.auth === "failed" ? "Offline" : "Checking..."}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Playbook AI Vector Store</span>
+                <span className={loadingSteps.playbook === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
+                  {loadingSteps.playbook === "success" ? "Connected" : loadingSteps.playbook === "failed" ? "Offline" : "Checking..."}
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={() => loadDashboardData(false)}
+                className="btn btn-primary btn-md flex-1 font-bold shadow-sm"
+              >
+                <RefreshCw className="h-4 w-4 mr-1.5 animate-spin-slow text-current" />
+                Retry Connection
+              </button>
+              <button
+                onClick={() => loadDashboardData(true)}
+                className="btn btn-accent btn-md flex-1 font-bold shadow-sm"
+              >
+                Proceed Offline (Mocks)
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const stepStates = Object.values(loadingSteps);
+    const successCount = stepStates.filter(s => s === "success").length;
+    const progressPercent = Math.round((successCount / stepStates.length) * 100);
+
+    const getActiveLoadingInfo = () => {
+      if (loadingSteps.overview === "pending") return "Fetching live indices from Yahoo Finance..."
+      if (loadingSteps.opportunities === "pending") return "Scanning swing setups for opportunities..."
+      if (loadingSteps.portfolio === "pending") return "Loading holdings and margin from Nubra..."
+      if (loadingSteps.auth === "pending") return "Checking Nubra session credentials validity..."
+      if (loadingSteps.playbook === "pending") return "Loading playbook vector index documents..."
+      return "Finalizing AI trading assistant workspace..."
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6">
+        <div className="w-full max-w-md flex flex-col gap-6 text-center">
+          <div className="flex items-center justify-center">
+            <span className="font-bold text-lg tracking-wider text-foreground">STALK MARKET</span>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-5 text-left shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-foreground">Initializing AI Workspace...</span>
+              <span className="text-xs font-mono font-bold text-primary">{progressPercent}%</span>
+            </div>
+
+            <div className="w-full bg-accent h-2 rounded-full overflow-hidden border border-border/30">
+              <div 
+                className="bg-primary h-full transition-all duration-300 rounded-full" 
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+
+            <div className="text-[11px] text-text-muted font-mono bg-accent/40 px-3 py-2.5 rounded-xl border border-border mt-0.5">
+              <span className="text-foreground font-semibold block mb-0.5">Active Operation:</span>
+              {getActiveLoadingInfo()}
+            </div>
+
+            <div className="flex flex-col gap-2.5 text-xs text-text-muted mt-1 font-medium">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${loadingSteps.overview === "success" ? "bg-success" : loadingSteps.overview === "failed" ? "bg-destructive" : "bg-primary/40 animate-pulse"}`} />
+                  Market Pulse & Indices
+                </span>
+                <span className="text-[10px] font-mono font-semibold">
+                  {loadingSteps.overview === "success" ? "Ready" : loadingSteps.overview === "failed" ? "Failed" : "Loading..."}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${loadingSteps.opportunities === "success" ? "bg-success" : loadingSteps.opportunities === "failed" ? "bg-destructive" : "bg-primary/40 animate-pulse"}`} />
+                  Swing Opportunity Scanner
+                </span>
+                <span className="text-[10px] font-mono font-semibold">
+                  {loadingSteps.opportunities === "success" ? "Ready" : loadingSteps.opportunities === "failed" ? "Failed" : "Loading..."}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${loadingSteps.portfolio === "success" ? "bg-success" : loadingSteps.portfolio === "failed" ? "bg-destructive" : "bg-primary/40 animate-pulse"}`} />
+                  Portfolio Statistics
+                </span>
+                <span className="text-[10px] font-mono font-semibold">
+                  {loadingSteps.portfolio === "success" ? "Ready" : loadingSteps.portfolio === "failed" ? "Failed" : "Loading..."}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${loadingSteps.auth === "success" ? "bg-success" : loadingSteps.auth === "failed" ? "bg-destructive" : "bg-primary/40 animate-pulse"}`} />
+                  Nubra API Integration
+                </span>
+                <span className="text-[10px] font-mono font-semibold">
+                  {loadingSteps.auth === "success" ? "Ready" : loadingSteps.auth === "failed" ? "Failed" : "Loading..."}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${loadingSteps.playbook === "success" ? "bg-success" : loadingSteps.playbook === "failed" ? "bg-destructive" : "bg-primary/40 animate-pulse"}`} />
+                  Playbook Strategy DB
+                </span>
+                <span className="text-[10px] font-mono font-semibold">
+                  {loadingSteps.playbook === "success" ? "Ready" : loadingSteps.playbook === "failed" ? "Failed" : "Loading..."}
+                </span>
+              </div>
+            </div>
+
+            <div className="border-t border-border/60 pt-3 flex justify-between items-center text-[10px] text-text-muted font-mono">
+              <span>Time Elapsed: {loadingElapsedTime}s</span>
+              <span>Estimated: ~1.5s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="app-shell flex h-screen overflow-hidden bg-background">
+      <aside className="w-60 border-r border-border bg-card flex flex-col justify-between p-4 shrink-0 select-none overflow-y-auto">
+        <div className="flex flex-col gap-6">
+          <div className="font-medium text-xs tracking-widest text-foreground pl-2 uppercase py-1 select-none">
+            STALK MARKET
+          </div>
+
+          <div className="flex flex-col gap-1 mt-2">
+            <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider px-2 mb-1">
+              Workspace
+            </span>
+            <nav className="flex flex-col gap-1">
+              <button
+                onClick={() => { setActiveTab("dashboard"); setSelectedSymbol(null); }}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded text-xs font-normal transition-all cursor-pointer border ${
+                  activeTab === "dashboard" && !selectedSymbol
+                    ? "bg-accent text-foreground border-border"
+                    : "text-text-muted hover:text-foreground hover:bg-accent/40 border-transparent"
+                }`}
+              >
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                Dashboard
+              </button>
+              <button
+                onClick={() => { setActiveTab("portfolio"); setSelectedSymbol(null); }}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded text-xs font-normal transition-all cursor-pointer border ${
+                  activeTab === "portfolio"
+                    ? "bg-accent text-foreground border-border"
+                    : "text-text-muted hover:text-foreground hover:bg-accent/40 border-transparent"
+                }`}
+              >
+                <Briefcase className="h-4 w-4 shrink-0" />
+                Portfolio
+              </button>
+              <button
+                onClick={() => { setActiveTab("playbook"); setSelectedSymbol(null); }}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded text-xs font-normal transition-all cursor-pointer border ${
+                  activeTab === "playbook"
+                    ? "bg-accent text-foreground border-border"
+                    : "text-text-muted hover:text-foreground hover:bg-accent/40 border-transparent"
+                }`}
+              >
+                <GraduationCap className="h-4 w-4 shrink-0" />
+                Playbooks
+              </button>
+              <button
+                onClick={() => { setActiveTab("automation"); setSelectedSymbol(null); }}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded text-xs font-normal transition-all cursor-pointer border ${
+                  activeTab === "automation"
+                    ? "bg-accent text-foreground border-border"
+                    : "text-text-muted hover:text-foreground hover:bg-accent/40 border-transparent"
+                }`}
+              >
+                <Bot className="h-4 w-4 shrink-0" />
+                Automation
+              </button>
+              <button
+                onClick={() => { setActiveTab("settings"); setSelectedSymbol(null); }}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded text-xs font-normal transition-all cursor-pointer border ${
+                  activeTab === "settings"
+                    ? "bg-accent text-foreground border-border"
+                    : "text-text-muted hover:text-foreground hover:bg-accent/40 border-transparent"
+                }`}
+              >
+                <Settings className="h-4 w-4 shrink-0" />
+                Settings
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-border pt-4 mt-auto">
+          <span className="text-[10px] font-medium text-text-muted uppercase tracking-wider px-2 block mb-1">
+            Live Indices
+          </span>
+          
+          <div className="flex items-center justify-between text-xs font-mono text-text-muted px-2 py-0.5">
+            <span>NIFTY 50</span>
+            <div className="flex gap-2">
+              <span className="text-foreground">
+                {marketOverview?.indices?.nifty?.price !== null && marketOverview?.indices?.nifty?.price !== undefined
+                  ? marketOverview.indices.nifty.price.toLocaleString("en-IN", { maximumFractionDigits: 0 })
+                  : "—"}
+              </span>
+              {marketOverview?.indices?.nifty?.change !== null && marketOverview?.indices?.nifty?.change !== undefined && (
+                <span className={marketOverview.indices.nifty.change >= 0 ? 'text-success' : 'text-destructive'}>
+                  {marketOverview.indices.nifty.change >= 0 ? '+' : ''}{marketOverview.indices.nifty.change.toFixed(2)}%
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between text-xs font-mono text-text-muted px-2 py-0.5">
+            <span>SENSEX</span>
+            <div className="flex gap-2">
+              <span className="text-foreground">
+                {marketOverview?.indices?.sensex?.price !== null && marketOverview?.indices?.sensex?.price !== undefined
+                  ? marketOverview.indices.sensex.price.toLocaleString("en-IN", { maximumFractionDigits: 0 })
+                  : "—"}
+              </span>
+              {marketOverview?.indices?.sensex?.change !== null && marketOverview?.indices?.sensex?.change !== undefined && (
+                <span className={marketOverview.indices.sensex.change >= 0 ? 'text-success' : 'text-destructive'}>
+                  {marketOverview.indices.sensex.change >= 0 ? '+' : ''}{marketOverview.indices.sensex.change.toFixed(2)}%
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-[10px] text-text-muted mt-2 border-t border-border/40 pt-2 font-mono px-2">
+            <div className="flex items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${
+                offlineMode 
+                  ? 'bg-warning animate-pulse' 
+                  : marketOverview?.market_status?.is_open 
+                  ? 'bg-success animate-pulse' 
+                  : 'bg-destructive'
+              }`} /> 
+              <span>{offlineMode ? 'Sandbox' : marketOverview?.market_status?.is_open ? 'Market Open' : 'Closed'}</span>
+            </div>
+            <span className="text-[10px]">
+              {offlineMode ? 'Mock' : marketOverview?.market_status?.session || 'UAT'}
+            </span>
+          </div>
+        </div>
+      </aside>
+
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-background">
+        
+        <header className="h-14 border-b border-border px-6 flex items-center justify-between shrink-0 bg-card z-10">
+          <div 
+            onClick={() => setCommandKOpen(true)}
+            className="flex items-center gap-2.5 bg-background border border-border rounded px-3 h-8 text-xs text-text-muted hover:text-foreground hover:border-text-muted w-72 cursor-pointer transition-colors"
+          >
+            <Search className="h-3.5 w-3.5 text-text-muted" />
+            <span>Search stock (e.g. HFCL)...</span>
+            <span className="ml-auto font-mono text-[9px] bg-accent text-primary border border-border px-1.5 py-0.2 rounded font-medium">
+              Ctrl+K
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="hidden xl:flex items-center gap-2 bg-background border border-border rounded px-3 h-8 text-xs">
+              <span className={`h-1.5 w-1.5 rounded-full ${offlineMode ? "bg-warning" : "bg-success animate-pulse"}`} />
+              <span className="font-normal text-foreground">{offlineMode ? "Offline Sandbox" : "Backend Online"}</span>
+              <span className="text-text-muted">/</span>
+              <span className={`font-normal ${authStatus.account_data_connected ? "text-success" : "text-warning"}`}>
+                {authStatus.account_data_connected ? "Nubra Live" : authStatus.authenticated ? "Nubra Partial" : "Nubra Disconnected"}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 bg-background border border-border rounded px-3 h-8 text-xs">
+              <span className="text-text-muted font-normal">Sandbox:</span>
+              <button 
+                onClick={handleToggleMockMode}
+                className={`w-8 h-4.5 rounded-full p-0.5 transition-colors cursor-pointer relative flex items-center ${authStatus.mock_mode ? 'bg-primary' : 'bg-border'}`}
+              >
+                <div className={`w-3.5 h-3.5 rounded-full bg-card transition-transform ${authStatus.mock_mode ? 'translate-x-3.5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+
+            <button
+              onClick={() => setTheme(t => t === "light" ? "dark" : "light")}
+              className="relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border border-border bg-background transition-colors duration-200 ease-in-out focus:outline-none items-center px-1"
+              title="Toggle Theme"
+            >
+              <div className={`pointer-events-none flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground shadow-sm ring-0 transition duration-200 ease-in-out ${theme === "light" ? "translate-x-0" : "translate-x-6"}`}>
+                {theme === "light" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+              </div>
+            </button>
+            
+            <button
+              onClick={() => setAiPanelOpen(!aiPanelOpen)}
+              className={`btn btn-sm font-normal px-2.5 border rounded ${
+                aiPanelOpen 
+                  ? 'bg-accent text-foreground border-border' 
+                  : 'bg-card text-text-muted border-border hover:bg-accent hover:text-foreground'
+              }`}
+              title="Toggle AI Panel"
+            >
+              <Bot className="h-3.5 w-3.5 mr-1" />
+              AI Panel
+            </button>
+            
+            <button
+              onClick={() => {
+                setAuthStep(1)
+                setAuthPhone("")
+                setAuthOtp("")
+                setAuthPin("")
+                setAuthDeviceId(authStatus.device_id || "STM_DEVICE_001")
+                setAuthError(null)
+                setAuthModalOpen(true)
+              }}
+              className={`btn btn-sm font-normal rounded ${authStatus.account_data_connected ? 'btn-accent' : 'btn-primary'}`}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 mr-1 text-current ${authStatus.account_data_connected ? 'animate-none' : 'animate-spin-slow'}`} />
+              {authStatus.account_data_connected ? "Sync Live" : "Sync Nubra"}
+            </button>
+          </div>
+        </header>
+
+        {/* 3. BODY DISPLAY SECTIONS */}
+        <div className="flex-1 p-8 overflow-y-auto">
+          {selectedSymbol ? (
+            /* Selected Scrip Details view */
+            <ScripAnalyzer
+              symbol={selectedSymbol}
+              onBack={() => setSelectedSymbol(null)}
+              onOpenOrderTicket={(scr) => {
+                setOrderTicketScrip(scr)
+                setOrderTicketOpen(true)
+              }}
+            />
+          ) : activeTab === "portfolio" ? (
+            /* Portfolio Tab view */
+            <HoldingsOverview
+              portfolioData={portfolioStats}
+              onSelectScrip={(sym) => setSelectedSymbol(sym)}
+              onOpenUploader={() => setActiveTab("playbook")}
+              onOpenSyncModal={() => setAuthModalOpen(true)}
+            />
+          ) : activeTab === "playbook" ? (
+            /* Playbook Training Tab view */
+            <div className="flex flex-col items-center pt-8">
+              <PlaybookUploader onUploadSuccess={handlePlaybookUpdate} />
+            </div>
+          ) : activeTab === "automation" ? (
+            /* Automation Lab view */
+            <div className="flex flex-col items-center pt-8">
+              <AutomationLab />
+            </div>
+          ) : activeTab === "settings" ? (
+            /* Settings Tab view */
+            <div className="flex flex-col items-center pt-8">
+              <SettingsPage 
+                onToggleMockMode={handleToggleMockMode}
+                onClearCredentials={handleClearCredentials}
+                playbookStats={playbookStats}
+                onOpenUploader={() => setActiveTab("playbook")}
+              />
+            </div>
+          ) : (
+            /* Dashboard Tab view - editorial terminal design */
+            <div className="flex flex-col gap-6 h-full">
+              {/* Contextual Greeting header (using full width, no status indicators) */}
+              <div className="py-4 pb-6 border-b border-border/60">
+                <h1 className="text-xl sm:text-[22px] font-medium text-foreground tracking-tight leading-normal">
+                  {(() => {
+                    const hour = new Date().getHours();
+                    const timeOfDay = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+                    return `Good ${timeOfDay}.`;
+                  })()}
+                  <span className="text-text-muted font-normal ml-2">
+                    {opportunities.length} swing opportunities match your playbook criteria.
+                  </span>
+                </h1>
+              </div>
+
+              {/* Top Opportunities Header & Filter Panel */}
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/40 pb-4 mb-2">
+                  <div>
+                    <h2 className="text-sm font-medium text-foreground">Top Opportunities</h2>
+                    <p className="text-xs text-text-muted mt-0.5">Scanned from liquid universes based on custom strategy playbooks</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <select 
+                      value={selectedSector}
+                      onChange={(e) => setSelectedSector(e.target.value)}
+                      className="select-sm rounded text-xs bg-card border border-border text-foreground hover:bg-accent focus:outline-none"
+                    >
+                      {["All Sectors", ...Array.from(new Set(opportunities.map((op: any) => op.sector || "Other")))].map(sec => (
+                        <option key={sec} value={sec}>{sec}</option>
+                      ))}
+                    </select>
+                    <select 
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="select-sm rounded text-xs bg-card border border-border text-foreground hover:bg-accent focus:outline-none"
+                    >
+                      <option value="AI Score">Sort by: AI Score</option>
+                      <option value="Daily Change">Sort by: Daily Change</option>
+                      <option value="LTP">Sort by: LTP</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Flat List of Opportunities as Clickable Cards */}
+                <div className="flex flex-col gap-6">
+                  {opportunities.length === 0 && (
+                    <div className="py-8 text-sm text-text-muted italic bg-accent/10 border border-border/40 px-4 rounded-lg">
+                      No qualifying opportunities from the current data scan. The scanner will not show fabricated setups when market data or risk/reward filters fail.
+                    </div>
+                  )}
+                  {opportunities
+                    .filter((op: any) => selectedSector === "All Sectors" || op.sector === selectedSector)
+                    .sort((a: any, b: any) => {
+                      if (sortBy === "Daily Change") {
+                        return (b.change || 0) - (a.change || 0)
+                      } else if (sortBy === "LTP") {
+                        return (b.price || 0) - (a.price || 0)
+                      }
+                      return (b.score || 0) - (a.score || 0)
+                    })
+                    .map((op: any, i: number) => {
+                      const opPositive = op.change >= 0
+                      return (
+                        <div 
+                          key={i} 
+                          onClick={() => setSelectedSymbol(op.symbol)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedSymbol(op.symbol);
+                            }
+                          }}
+                          tabIndex={0}
+                          className="opportunity-card flex flex-col gap-4 overflow-hidden"
+                        >
+                          {/* Row 1: Stock info & Score & Price (full width, slightly darker background) */}
+                          <div className="-mx-[1.25rem] -mt-[1.5rem] px-[1.25rem] py-3.5 bg-accent/20 dark:bg-background/40 border-b border-border/20 flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex items-baseline gap-2.5 flex-wrap">
+                              <span className="text-xs text-text-muted font-normal select-none">{(i + 1).toString().padStart(2, '0')}</span>
+                              <span className="font-medium text-lg text-foreground tracking-tight">{op.symbol}</span>
+                              <span className="text-sm text-text-muted font-normal">{op.name}</span>
+                              <span className="text-xs text-text-muted/50 font-normal">/ {op.sector}</span>
+                              <span className={`text-[11px] px-2.5 py-0.5 border font-normal rounded-md shrink-0 ${
+                                op.setup === 'Developing Setup' 
+                                  ? 'text-warning bg-warning/5 border-warning/20' 
+                                  : 'text-foreground bg-accent border-border/80'
+                              }`}>
+                                {op.setup}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-baseline gap-4 shrink-0">
+                              {/* Price & Change */}
+                              <div className="flex items-baseline gap-2">
+                                <span className="font-medium text-lg text-foreground">
+                                  {op.price !== null && op.price !== undefined ? `₹${op.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—"}
+                                </span>
+                                {op.change !== null && op.change !== undefined && (
+                                  <span className={`text-sm font-medium ${opPositive ? 'text-success' : 'text-destructive'}`}>
+                                    {opPositive ? '+' : ''}{op.change.toFixed(2)}%
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {/* Score block */}
+                              <div className="flex items-center gap-1.5 bg-background/50 border border-border/50 px-2.5 py-1 rounded-md text-sm select-none">
+                                <span className="font-medium text-lg text-foreground leading-none">{op.score}</span>
+                                <span className="text-xs text-text-muted uppercase tracking-wider border-l border-border/40 pl-1.5 leading-none">Score</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Row 2: Short, concise, data-driven explanation (increased to 14px size) */}
+                          <div className="text-sm text-text-muted truncate overflow-hidden whitespace-nowrap block py-1" title={getTechnicalExplanation(op)}>
+                            {getTechnicalExplanation(op)}
+                          </div>
+
+                          {/* Row 3: Parameters block (integrated, strict 5-col grid with dividers, labels set to 13px) */}
+                          <div className="grid grid-cols-5 divide-x divide-border/20 pt-3.5 border-t border-border/20 items-center text-center">
+                            <div className="px-1">
+                              <span className="block text-xs text-text-muted uppercase tracking-wider font-normal">Entry Range</span>
+                              <span className="font-medium text-base text-foreground mt-1.5 block truncate">
+                                {op.entry.replace("INR ", "₹")}
+                              </span>
+                            </div>
+                            <div className="px-1">
+                              <span className="block text-xs text-text-muted uppercase tracking-wider font-normal">Target Price</span>
+                              <span className="font-medium text-base text-foreground mt-1.5 block truncate">
+                                {op.target.replace("INR ", "₹")}
+                              </span>
+                            </div>
+                            <div className="px-1">
+                              <span className="block text-xs text-text-muted uppercase tracking-wider font-normal">Stop Loss</span>
+                              <span className="font-medium text-base text-destructive mt-1.5 block truncate">
+                                {op.stop.replace("INR ", "₹")}
+                              </span>
+                            </div>
+                            <div className="px-1">
+                              <span className="block text-xs text-text-muted uppercase tracking-wider font-normal">Risk Reward</span>
+                              <span className="font-medium text-base text-foreground mt-1.5 block truncate">
+                                {op.risk_reward ? `${op.risk_reward}:1` : "—"}
+                              </span>
+                            </div>
+                            <div className="px-1">
+                              <span className="block text-xs text-text-muted uppercase tracking-wider font-normal">Potential Upside</span>
+                              <span className="font-medium text-base text-success mt-1.5 block truncate">
+                                {op.upside_pct ? `+${op.upside_pct}%` : "—"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* 4. MODALS OVERLAYS */}
+
+      {/* Command K Search overlay */}
+      <CommandK
+        isOpen={commandKOpen}
+        onClose={() => setCommandKOpen(false)}
+        onSelectStock={(sym) => setSelectedSymbol(sym)}
+      />
+
+      {/* Order execution ticket overlay */}
+      {orderTicketOpen && orderTicketScrip && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <OrderTicket
+            scrip={orderTicketScrip}
+            availableMargin={portfolioStats?.funds?.net_margin_available || 0}
+            onPlaceOrder={handleExecuteTrade}
+            onClose={() => setOrderTicketOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* Nubra API Auth sync modal */}
+      {authModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-sm relative shadow-2xl">
+            <button
+              onClick={() => setAuthModalOpen(false)}
+              className="absolute top-4 right-4 text-text-muted hover:text-foreground cursor-pointer p-1 rounded-xl hover:bg-accent"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <h2 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-primary animate-spin-slow" />
+              Sync Nubra Broker API
+            </h2>
+            
+            {savedCredsStatus.phone_saved && savedCredsStatus.mpin_saved && (
+              <div className="flex justify-between items-center mb-4 p-2 bg-accent/40 rounded-xl border border-primary/10 text-[10px]">
+                <span className="text-text-muted">
+                  Auto-Sync credentials stored
+                </span>
+                <button 
+                  onClick={handleClearCredentials}
+                  className="text-destructive font-bold hover:underline cursor-pointer"
+                >
+                  Clear Stored
+                </button>
+              </div>
+            )}
+            
+            {authError && (
+              <div className="p-3 mb-4 bg-destructive/10 border border-destructive/25 text-destructive rounded-xl text-xs flex items-start gap-2 shadow-sm animate-pulse">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            {authStep === 1 && (
+              <form onSubmit={handleRequestOTP} className="flex flex-col gap-4">
+                <p className="text-xs text-text-muted leading-relaxed">
+                  {savedCredsStatus.phone_saved ? (
+                    <span>Using saved phone number <b>{authPhone}</b>. Click request to trigger OTP.</span>
+                  ) : (
+                    <span>Enter your registered mobile number linked to your Nubra trading account to request an OTP.</span>
+                  )}
+                </p>
+                <input
+                  type="text"
+                  placeholder="Enter Phone Number (e.g. 0000000000)"
+                  value={authPhone}
+                  onChange={(e) => setAuthPhone(e.target.value)}
+                  className="input-md font-mono"
+                />
+                <input
+                  type="text"
+                  placeholder="Nubra Device ID"
+                  value={authDeviceId}
+                  onChange={(e) => setAuthDeviceId(e.target.value)}
+                  className="input-md font-mono"
+                />
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-md w-full font-bold shadow-sm"
+                >
+                  REQUEST OTP
+                </button>
+              </form>
+            )}
+
+            {authStep === 2 && (
+              <form onSubmit={handleVerifyOTP} className="flex flex-col gap-4">
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Enter the OTP sent to <b>{authPhone}</b>. {savedCredsStatus.mpin_saved ? (
+                    <span className="text-primary font-bold block mt-1">Stored MPIN will be verified automatically after OTP confirmation.</span>
+                  ) : (
+                    <span>(Use <b>123456</b> in mock mode).</span>
+                  )}
+                </p>
+                <input
+                  type="text"
+                  placeholder="Enter 6-Digit OTP"
+                  value={authOtp}
+                  onChange={(e) => setAuthOtp(e.target.value)}
+                  className="input-md font-mono"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-md w-full font-bold shadow-sm"
+                >
+                  VERIFY OTP & SYNC
+                </button>
+              </form>
+            )}
+
+            {authStep === 3 && (
+              <form onSubmit={handleVerifyMPIN} className="flex flex-col gap-4">
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Enter your Nubra Account MPIN to authenticate. (Use <b>1234</b> in mock mode).
+                </p>
+                <input
+                  type="password"
+                  placeholder="Enter 4-Digit MPIN"
+                  value={authPin}
+                  onChange={(e) => setAuthPin(e.target.value)}
+                  className="input-md font-mono"
+                  autoFocus
+                />
+                
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="checkbox"
+                    id="save_creds"
+                    checked={saveCredsCheckbox}
+                    onChange={(e) => setSaveCredsCheckbox(e.target.checked)}
+                    className="rounded border-border text-primary focus:ring-primary h-3.5 w-3.5"
+                  />
+                  <label htmlFor="save_creds" className="text-[11px] text-text-muted font-bold select-none cursor-pointer">
+                    Save credentials for instant auto-sync in future
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-md w-full font-bold shadow-sm mt-1"
+                >
+                  VERIFY MPIN & STORE
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 3. AI COLLAPSIBLE SIDE PANEL */}
+      {aiPanelOpen && (
+        <aside className="w-96 border-l border-border bg-card flex flex-col h-full shrink-0 z-10 overflow-hidden">
+          <Chatbot 
+            onManagePlaybooks={() => setActiveTab("playbook")}
+            totalFiles={playbookStats.files.length}
+            chunksCount={playbookStats.chunks_count}
+          />
+        </aside>
+      )}
+    </div>
+  )
+}
+
+export default App

@@ -1,0 +1,370 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist", Consolas, "Courier New", monospace; /* Fallback to Geist as default font */
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-border-hover: var(--border-hover);
+  --color-input: var(--input);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-success: var(--success);
+  --color-success-dark: var(--success-dark);
+  --color-warning: var(--warning);
+  
+  --radius-card: 8px;
+  --radius-input: 8px;
+  --radius-button: 8px;
+  --radius-pill: 9999px;
+  
+  /* Map Tailwind radius utilities to maintain 8px consistency across the entire codebase */
+  --radius-2xl: var(--radius-card);
+  --radius-xl: var(--radius-card);
+  --radius-lg: var(--radius-card);
+  --radius-md: var(--radius-card);
+  --radius-sm: var(--radius-card);
+
+  /* Increased Typography Sizing Hierarchy by 1-2px */
+  --font-size-xs: 0.8125rem; /* 13px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: clamp(1.125rem, 1.6vw, 1.25rem); /* ~18px-20px */
+  --font-size-xl: clamp(1.375rem, 2.5vw, 1.5rem); /* ~22px-24px */
+  --font-size-2xl: clamp(1.625rem, 4vw, 1.875rem); /* ~26px-30px */
+}
+
+:root {
+  /* Design Tokens - Premium Light Mode (Subtle card surface slightly lighter than background) */
+  --background: #FAFAFA; /* Off-white page background */
+  --foreground: #111111;
+  --text-muted: #666666;
+  --border: #EEEEEE;
+  --border-hover: #D5D5D5;
+  --primary: #111111;
+  --primary-foreground: #FFFFFF;
+  --card: #FFFFFF; /* Pure white card */
+  --card-hover: #FDFDFD;
+  --input: #FFFFFF;
+  --accent: #F0F0F0;
+  --accent-foreground: #111111;
+  --destructive: #E53E3E;
+  --destructive-foreground: #FFFFFF;
+  --success: #2F855A;
+  --success-dark: #276749;
+  --warning: #DD6B20;
+}
+
+.dark {
+  /* Design Tokens - Premium Dark Mode (Subtle card surface slightly lighter than background) */
+  --background: #0A0A0A; /* Dark page background */
+  --foreground: #EDEDED;
+  --text-muted: #888888;
+  --border: #1F1F1F;
+  --border-hover: #2D2D2D;
+  --primary: #EDEDED;
+  --primary-foreground: #0A0A0A;
+  --card: #121212; /* Slightly lighter card surface */
+  --card-hover: #181818;
+  --input: #121212;
+  --accent: #1A1A1A;
+  --accent-foreground: #EDEDED;
+  --destructive: #E53E3E;
+  --destructive-foreground: #FFFFFF;
+  --success: #2F855A;
+  --success-dark: #276749;
+  --warning: #DD6B20;
+}
+
+/* Base Body Styles */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  transition: background-color 150ms ease, color 150ms ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings with Display Font and restricted weights */
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-2xl);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+
+p, span, div, button, input, select, textarea {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+/* Global Transition Utility */
+.transition-all-custom {
+  transition: all 150ms ease;
+}
+
+/* Card Class Styling */
+.card-custom {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 1.5rem 1.25rem; /* Increased vertical breathing room */
+  transition: background-color 180ms ease-in-out, border-color 180ms ease-in-out, transform 180ms ease-in-out, box-shadow 180ms ease-in-out;
+}
+
+/* Specific Opportunity Card Styling */
+.opportunity-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 1.5rem 1.25rem; /* Increased vertical breathing room */
+  cursor: pointer;
+  outline: none;
+  transition: background-color 180ms ease-in-out, border-color 180ms ease-in-out, transform 180ms ease-in-out, box-shadow 180ms ease-in-out;
+}
+
+.opportunity-card:hover {
+  background-color: var(--card-hover);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.opportunity-card:focus-visible {
+  outline: none;
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 2px var(--border-hover);
+}
+
+/* Button Component Standards */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: var(--font-size-xs);
+  transition: background-color 150ms ease, opacity 150ms ease;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  text-decoration: none;
+  border-radius: var(--radius-button);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background-color: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--accent);
+}
+
+.btn-accent {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--border);
+}
+.btn-accent:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-destructive {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+.btn-destructive:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* Button Size standards matching 40px (md) and 32px (sm) */
+.btn-md {
+  height: 2.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.btn-sm {
+  height: 2rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.btn-lg {
+  height: 3rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Input Styles */
+.input-md {
+  height: 2.5rem;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  transition: border-color 150ms ease;
+  width: 100%;
+}
+.input-md:focus {
+  border-color: var(--text-muted);
+  outline: none;
+}
+.input-md:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dropdown Standard Sizing */
+.select-md {
+  height: 2.5rem;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  padding-left: 0.75rem;
+  padding-right: 1.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease;
+}
+.select-md:hover {
+  background-color: var(--accent);
+}
+
+.select-sm {
+  height: 2rem;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  padding-left: 0.5rem;
+  padding-right: 1.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease;
+}
+.select-sm:hover {
+  background-color: var(--accent);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.app-shell {
+  min-width: 0;
+}
+
+.app-shell main,
+.app-shell aside {
+  min-width: 0;
+}
+
+/* Responsive grid layout queries for terminal/trading dashboards */
+@media (max-width: 900px) {
+  .app-shell {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+
+  .app-shell > aside {
+    width: 100%;
+    max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .app-shell > main {
+    height: auto;
+    min-height: 0;
+  }
+
+  .app-shell header {
+    height: auto;
+    min-height: 64px;
+    padding: 12px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .app-shell header > div:first-child {
+    width: 100%;
+  }
+
+  .app-shell main > div.flex-1 {
+    padding: 16px;
+  }
+}

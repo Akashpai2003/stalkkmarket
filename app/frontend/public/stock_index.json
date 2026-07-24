@@ -1,0 +1,522 @@
+[
+  {
+    "Symbol": "ABB",
+    "Company Name": "ABB India Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "ADANIENSOL",
+    "Company Name": "Adani Energy Solutions Ltd.",
+    "Sector": "Power"
+  },
+  {
+    "Symbol": "ADANIENT",
+    "Company Name": "Adani Enterprises Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "ADANIGREEN",
+    "Company Name": "Adani Green Energy Ltd.",
+    "Sector": "Power"
+  },
+  {
+    "Symbol": "ADANIPORTS",
+    "Company Name": "Adani Ports and Special Economic Zone Ltd.",
+    "Sector": "Services"
+  },
+  {
+    "Symbol": "ADANIPOWER",
+    "Company Name": "Adani Power Ltd.",
+    "Sector": "Power"
+  },
+  {
+    "Symbol": "AMBUJACEM",
+    "Company Name": "Ambuja Cements Ltd.",
+    "Sector": "Construction Materials"
+  },
+  {
+    "Symbol": "APOLLOHOSP",
+    "Company Name": "Apollo Hospitals Enterprise Ltd.",
+    "Sector": "Healthcare"
+  },
+  {
+    "Symbol": "ASIANPAINT",
+    "Company Name": "Asian Paints Ltd.",
+    "Sector": "Consumer Durables"
+  },
+  {
+    "Symbol": "DMART",
+    "Company Name": "Avenue Supermarts Ltd.",
+    "Sector": "Consumer Services"
+  },
+  {
+    "Symbol": "AXISBANK",
+    "Company Name": "Axis Bank Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "BAJAJ-AUTO",
+    "Company Name": "Bajaj Auto Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "BAJFINANCE",
+    "Company Name": "Bajaj Finance Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "BAJAJFINSV",
+    "Company Name": "Bajaj Finserv Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "BAJAJHLDNG",
+    "Company Name": "Bajaj Holdings & Investment Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "BANKBARODA",
+    "Company Name": "Bank of Baroda",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "BEL",
+    "Company Name": "Bharat Electronics Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "BPCL",
+    "Company Name": "Bharat Petroleum Corporation Ltd.",
+    "Sector": "Oil Gas & Consumable Fuels"
+  },
+  {
+    "Symbol": "BHARTIARTL",
+    "Company Name": "Bharti Airtel Ltd.",
+    "Sector": "Telecommunication"
+  },
+  {
+    "Symbol": "BOSCHLTD",
+    "Company Name": "Bosch Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "BRITANNIA",
+    "Company Name": "Britannia Industries Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "CGPOWER",
+    "Company Name": "CG Power and Industrial Solutions Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "CANBK",
+    "Company Name": "Canara Bank",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "CHOLAFIN",
+    "Company Name": "Cholamandalam Investment and Finance Company Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "CIPLA",
+    "Company Name": "Cipla Ltd.",
+    "Sector": "Healthcare"
+  },
+  {
+    "Symbol": "COALINDIA",
+    "Company Name": "Coal India Ltd.",
+    "Sector": "Oil Gas & Consumable Fuels"
+  },
+  {
+    "Symbol": "CUMMINSIND",
+    "Company Name": "Cummins India Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "DLF",
+    "Company Name": "DLF Ltd.",
+    "Sector": "Realty"
+  },
+  {
+    "Symbol": "DIVISLAB",
+    "Company Name": "Divi's Laboratories Ltd.",
+    "Sector": "Healthcare"
+  },
+  {
+    "Symbol": "DRREDDY",
+    "Company Name": "Dr. Reddy's Laboratories Ltd.",
+    "Sector": "Healthcare"
+  },
+  {
+    "Symbol": "EICHERMOT",
+    "Company Name": "Eicher Motors Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "ETERNAL",
+    "Company Name": "Eternal Ltd.",
+    "Sector": "Consumer Services"
+  },
+  {
+    "Symbol": "GAIL",
+    "Company Name": "GAIL (India) Ltd.",
+    "Sector": "Oil Gas & Consumable Fuels"
+  },
+  {
+    "Symbol": "GODREJCP",
+    "Company Name": "Godrej Consumer Products Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "GRASIM",
+    "Company Name": "Grasim Industries Ltd.",
+    "Sector": "Construction Materials"
+  },
+  {
+    "Symbol": "HCLTECH",
+    "Company Name": "HCL Technologies Ltd.",
+    "Sector": "Information Technology"
+  },
+  {
+    "Symbol": "HDFCAMC",
+    "Company Name": "HDFC Asset Management Company Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "HDFCBANK",
+    "Company Name": "HDFC Bank Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "HDFCLIFE",
+    "Company Name": "HDFC Life Insurance Company Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "HINDALCO",
+    "Company Name": "Hindalco Industries Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "HAL",
+    "Company Name": "Hindustan Aeronautics Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "HINDUNILVR",
+    "Company Name": "Hindustan Unilever Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "HINDZINC",
+    "Company Name": "Hindustan Zinc Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "HYUNDAI",
+    "Company Name": "Hyundai Motor India Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "ICICIBANK",
+    "Company Name": "ICICI Bank Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "ITC",
+    "Company Name": "ITC Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "INDHOTEL",
+    "Company Name": "Indian Hotels Co. Ltd.",
+    "Sector": "Consumer Services"
+  },
+  {
+    "Symbol": "IOC",
+    "Company Name": "Indian Oil Corporation Ltd.",
+    "Sector": "Oil Gas & Consumable Fuels"
+  },
+  {
+    "Symbol": "IRFC",
+    "Company Name": "Indian Railway Finance Corporation Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "INFY",
+    "Company Name": "Infosys Ltd.",
+    "Sector": "Information Technology"
+  },
+  {
+    "Symbol": "INDIGO",
+    "Company Name": "InterGlobe Aviation Ltd.",
+    "Sector": "Services"
+  },
+  {
+    "Symbol": "JSWSTEEL",
+    "Company Name": "JSW Steel Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "JINDALSTEL",
+    "Company Name": "Jindal Steel Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "JIOFIN",
+    "Company Name": "Jio Financial Services Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "KOTAKBANK",
+    "Company Name": "Kotak Mahindra Bank Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "LTM",
+    "Company Name": "LTM Ltd.",
+    "Sector": "Information Technology"
+  },
+  {
+    "Symbol": "LT",
+    "Company Name": "Larsen & Toubro Ltd.",
+    "Sector": "Construction"
+  },
+  {
+    "Symbol": "LODHA",
+    "Company Name": "Lodha Developers Ltd.",
+    "Sector": "Realty"
+  },
+  {
+    "Symbol": "M&M",
+    "Company Name": "Mahindra & Mahindra Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "MARUTI",
+    "Company Name": "Maruti Suzuki India Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "MAXHEALTH",
+    "Company Name": "Max Healthcare Institute Ltd.",
+    "Sector": "Healthcare"
+  },
+  {
+    "Symbol": "MAZDOCK",
+    "Company Name": "Mazagoan Dock Shipbuilders Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "MUTHOOTFIN",
+    "Company Name": "Muthoot Finance Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "NTPC",
+    "Company Name": "NTPC Ltd.",
+    "Sector": "Power"
+  },
+  {
+    "Symbol": "NESTLEIND",
+    "Company Name": "Nestle India Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "ONGC",
+    "Company Name": "Oil & Natural Gas Corporation Ltd.",
+    "Sector": "Oil Gas & Consumable Fuels"
+  },
+  {
+    "Symbol": "PIDILITIND",
+    "Company Name": "Pidilite Industries Ltd.",
+    "Sector": "Chemicals"
+  },
+  {
+    "Symbol": "PFC",
+    "Company Name": "Power Finance Corporation Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "POWERGRID",
+    "Company Name": "Power Grid Corporation of India Ltd.",
+    "Sector": "Power"
+  },
+  {
+    "Symbol": "PNB",
+    "Company Name": "Punjab National Bank",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "RECLTD",
+    "Company Name": "REC Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "RELIANCE",
+    "Company Name": "Reliance Industries Ltd.",
+    "Sector": "Oil Gas & Consumable Fuels"
+  },
+  {
+    "Symbol": "SBILIFE",
+    "Company Name": "SBI Life Insurance Company Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "MOTHERSON",
+    "Company Name": "Samvardhana Motherson International Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "SHREECEM",
+    "Company Name": "Shree Cement Ltd.",
+    "Sector": "Construction Materials"
+  },
+  {
+    "Symbol": "SHRIRAMFIN",
+    "Company Name": "Shriram Finance Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "ENRIN",
+    "Company Name": "Siemens Energy India Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "SIEMENS",
+    "Company Name": "Siemens Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "SOLARINDS",
+    "Company Name": "Solar Industries India Ltd.",
+    "Sector": "Chemicals"
+  },
+  {
+    "Symbol": "SBIN",
+    "Company Name": "State Bank of India",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "SUNPHARMA",
+    "Company Name": "Sun Pharmaceutical Industries Ltd.",
+    "Sector": "Healthcare"
+  },
+  {
+    "Symbol": "TVSMOTOR",
+    "Company Name": "TVS Motor Company Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "TATACAP",
+    "Company Name": "Tata Capital Ltd.",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "TCS",
+    "Company Name": "Tata Consultancy Services Ltd.",
+    "Sector": "Information Technology"
+  },
+  {
+    "Symbol": "TATACONSUM",
+    "Company Name": "Tata Consumer Products Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "TMCV",
+    "Company Name": "Tata Motors Ltd.",
+    "Sector": "Capital Goods"
+  },
+  {
+    "Symbol": "TMPV",
+    "Company Name": "Tata Motors Passenger Vehicles Ltd.",
+    "Sector": "Automobile and Auto Components"
+  },
+  {
+    "Symbol": "TATAPOWER",
+    "Company Name": "Tata Power Co. Ltd.",
+    "Sector": "Power"
+  },
+  {
+    "Symbol": "TATASTEEL",
+    "Company Name": "Tata Steel Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "TECHM",
+    "Company Name": "Tech Mahindra Ltd.",
+    "Sector": "Information Technology"
+  },
+  {
+    "Symbol": "TITAN",
+    "Company Name": "Titan Company Ltd.",
+    "Sector": "Consumer Durables"
+  },
+  {
+    "Symbol": "TORNTPHARM",
+    "Company Name": "Torrent Pharmaceuticals Ltd.",
+    "Sector": "Healthcare"
+  },
+  {
+    "Symbol": "TRENT",
+    "Company Name": "Trent Ltd.",
+    "Sector": "Consumer Services"
+  },
+  {
+    "Symbol": "ULTRACEMCO",
+    "Company Name": "UltraTech Cement Ltd.",
+    "Sector": "Construction Materials"
+  },
+  {
+    "Symbol": "UNIONBANK",
+    "Company Name": "Union Bank of India",
+    "Sector": "Financial Services"
+  },
+  {
+    "Symbol": "UNITDSPR",
+    "Company Name": "United Spirits Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "VBL",
+    "Company Name": "Varun Beverages Ltd.",
+    "Sector": "Fast Moving Consumer Goods"
+  },
+  {
+    "Symbol": "VAML",
+    "Company Name": "Vedanta Aluminium Metal Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "VISL",
+    "Company Name": "Vedanta Iron and Steel Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "VEDL",
+    "Company Name": "Vedanta Ltd.",
+    "Sector": "Metals & Mining"
+  },
+  {
+    "Symbol": "VOGL",
+    "Company Name": "Vedanta Oil and Gas Ltd.",
+    "Sector": "Oil Gas & Consumable Fuels"
+  },
+  {
+    "Symbol": "VEDPOWER",
+    "Company Name": "Vedanta Power Ltd.",
+    "Sector": "Power"
+  },
+  {
+    "Symbol": "WIPRO",
+    "Company Name": "Wipro Ltd.",
+    "Sector": "Information Technology"
+  },
+  {
+    "Symbol": "ZYDUSLIFE",
+    "Company Name": "Zydus Lifesciences Ltd.",
+    "Sector": "Healthcare"
+  }
+]

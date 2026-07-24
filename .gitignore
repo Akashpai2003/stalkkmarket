@@ -1,0 +1,35 @@
+# Node
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Databases and Local Storage
+app/backend/db/
+app/backend/uploaded_playbooks/
+*.db
+*.sqlite
+
+# Environment variables & credentials
+.env
+.env.*
+.herenow/
+credentials
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
