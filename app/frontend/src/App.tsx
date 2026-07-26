@@ -106,10 +106,10 @@ function App() {
     }
   })
   
-  const [opportunities, setOpportunities] = useState<any[]>(isSandboxMode ? [
+  const [opportunities, setOpportunities] = useState<any[]>([
     { 
       symbol: "RELIANCE", 
-      name: "Reliance Industries Ltd (Mock)", 
+      name: "Reliance Industries Ltd", 
       sector: "Energy", 
       score: 88, 
       rsi: 61.2, 
@@ -127,7 +127,7 @@ function App() {
     },
     { 
       symbol: "TVSMOTOR", 
-      name: "TVS Motor Co (Mock)", 
+      name: "TVS Motor Co", 
       sector: "Auto", 
       score: 74, 
       rsi: 54.3, 
@@ -145,7 +145,7 @@ function App() {
     },
     { 
       symbol: "HFCL", 
-      name: "HFCL Ltd (Mock)", 
+      name: "HFCL Ltd", 
       sector: "Telecom", 
       score: 81, 
       rsi: 59.8, 
@@ -163,7 +163,7 @@ function App() {
     },
     { 
       symbol: "KPITTECH", 
-      name: "KPIT Technologies (Mock)", 
+      name: "KPIT Technologies", 
       sector: "IT Services", 
       score: 92, 
       rsi: 68.5, 
@@ -181,7 +181,7 @@ function App() {
     },
     { 
       symbol: "HDFCBANK", 
-      name: "HDFC Bank Ltd (Mock)", 
+      name: "HDFC Bank Ltd", 
       sector: "Banking", 
       score: 79, 
       rsi: 58.1, 
@@ -199,7 +199,7 @@ function App() {
     },
     { 
       symbol: "COFORGE", 
-      name: "Coforge Ltd (Mock)", 
+      name: "Coforge Ltd", 
       sector: "IT Services", 
       score: 85, 
       rsi: 63.4, 
@@ -217,7 +217,7 @@ function App() {
     },
     { 
       symbol: "INFY", 
-      name: "Infosys Ltd (Mock)", 
+      name: "Infosys Ltd", 
       sector: "IT", 
       score: 68, 
       rsi: 48.2, 
@@ -233,9 +233,9 @@ function App() {
       upside_pct: "7.0",
       ref_id: 1755607
     }
-  ] : [])
+  ])
   
-  const [portfolioStats, setPortfolioStats] = useState<any>(isSandboxMode ? {
+  const [portfolioStats, setPortfolioStats] = useState<any>({
     status: "success",
     is_sandbox: true,
     funds: {
@@ -310,7 +310,7 @@ function App() {
       ]
     },
     positions: []
-  } : null)
+  })
   
   const [playbookStats, setPlaybookStats] = useState<{ files: string[], chunks_count: number, sources?: any[] }>(isSandboxMode ? {
     files: ["Sandbox_Trading_Rules.pdf"],
