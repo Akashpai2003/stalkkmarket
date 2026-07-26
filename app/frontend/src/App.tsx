@@ -57,8 +57,6 @@ function getTechnicalExplanation(op: any) {
 function App() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "portfolio" | "playbook" | "automation" | "settings">("dashboard")
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
-  const [showUrlInput, setShowUrlInput] = useState(false)
-  const [customBackendUrl, setCustomBackendUrl] = useState(() => localStorage.getItem("stalk_market_backend_url") || "")
   const [mobileChatbotOpen, setMobileChatbotOpen] = useState<boolean>(false)
   const [mobilePerformanceOpen, setMobilePerformanceOpen] = useState<boolean>(false)
 
@@ -97,14 +95,16 @@ function App() {
   };
 
   // Market & opportunities state
-  const [marketOverview, setMarketOverview] = useState<any>(isSandboxMode ? {
-    market_status: { session: "Closed (Sandbox)", open: false, time: new Date().toLocaleTimeString() },
-    market_health: { score: 7.2, sentiment: "Neutral Sandbox", suggested_exposure: "30%" },
+  const [marketOverview, setMarketOverview] = useState<any>({
+    market_status: { session: "Regular Trading", open: true, time: new Date().toLocaleTimeString() },
+    market_health: { score: 7.5, sentiment: "Constructive", suggested_exposure: "75%" },
     indices: {
-      nifty: { price: 24200.5, change: 120.5, sparkline: [24000, 24050, 24100, 24150, 24200], data_available: true, provider: "Mock", last_updated: "Offline Sandbox" },
-      sensex: { price: 79500.2, change: 380.4, sparkline: [79000, 79100, 79300, 79400, 79500], data_available: true, provider: "Mock", last_updated: "Offline Sandbox" }
+      nifty: { price: 23767.45, change: -0.43, sparkline: [23700, 23720, 23750, 23760, 23767.45], data_available: true },
+      sensex: { price: 76059.77, change: -0.43, sparkline: [76000, 76020, 76040, 76050, 76059.77], data_available: true },
+      banknifty: { price: 56694.20, change: 0.18, sparkline: [56600, 56630, 56650, 56680, 56694.20], data_available: true },
+      midcap: { price: 58942.50, change: -0.83, sparkline: [58900, 58910, 58920, 58930, 58942.50], data_available: true }
     }
-  } : null)
+  })
   
   const [opportunities, setOpportunities] = useState<any[]>(isSandboxMode ? [
     { 
@@ -318,25 +318,8 @@ function App() {
     sources: []
   } : { files: [], chunks_count: 0, sources: [] })
   
-  const [loading, setLoading] = useState<boolean>(!isSandboxMode)
+  const [backendStatus, setBackendStatus] = useState<"connecting" | "connected" | "fallback">("connecting")
   const [offlineMode, setOfflineMode] = useState<boolean>(isSandboxMode)
-  
-  // Detailed booting/loading stages
-  const [loadingSteps, setLoadingSteps] = useState<{
-    overview: "pending" | "success" | "failed";
-    opportunities: "pending" | "success" | "failed";
-    portfolio: "pending" | "success" | "failed";
-    auth: "pending" | "success" | "failed";
-    playbook: "pending" | "success" | "failed";
-  }>({
-    overview: "pending",
-    opportunities: "pending",
-    portfolio: "pending",
-    auth: "pending",
-    playbook: "pending"
-  })
-  const [loadingElapsedTime, setLoadingElapsedTime] = useState<number>(0)
-  const [loadingError, setLoadingError] = useState<string | null>(null)
   
   // Opportunities filters & sorting
   const [selectedSector, setSelectedSector] = useState<string>("All Sectors")
@@ -404,7 +387,7 @@ function App() {
   }, [researchExpanded])
 
   // Fetch initial dashboard & portfolio data
-  const loadDashboardData = async (forceOffline: boolean = false, isSilent: boolean = false) => {
+  const loadDashboardData = async (forceOffline: boolean = false) => {
     if (forceOffline) {
       // Set client-side dummy values to allow instant loading in sandbox mode
       setMarketOverview({
@@ -622,29 +605,10 @@ function App() {
       setAuthStatus({ authenticated: true, mock_mode: true, phone_saved: true, mpin_saved: true, phone: "9876543210" });
       setPlaybookStats({ files: ["Sandbox_Trading_Rules.pdf"], chunks_count: 5 });
       setOfflineMode(true);
-      setLoadingError(null);
-      setLoading(false);
       return;
     }
 
-    if (!isSilent) {
-      setLoading(true)
-      setLoadingError(null)
-      setLoadingElapsedTime(0)
-      setLoadingSteps({
-        overview: "pending",
-        opportunities: "pending",
-        portfolio: "pending",
-        auth: "pending",
-        playbook: "pending"
-      })
-    }
-
-    const startTime = Date.now()
-    const timer = !isSilent ? setInterval(() => {
-      setLoadingElapsedTime(parseFloat(((Date.now() - startTime) / 1000).toFixed(1)))
-    }, 100) : null
-
+    setBackendStatus("connecting")
     const API_BASE = "https://stalkkmarket.onrender.com"
 
     const fetchWithRetry = async (endpoint: string, retries = 3): Promise<any> => {
@@ -667,64 +631,22 @@ function App() {
 
     try {
       const fetchPromises = [
-        fetchWithRetry("/api/market/overview")
-          .then((data) => {
-            setMarketOverview(data)
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, overview: "success" }))
-          })
-          .catch((err) => {
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, overview: "failed" }))
-            throw err
-          }),
-        fetchWithRetry("/api/market/opportunities-v2")
-          .then((data) => {
-            setOpportunities(data)
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, opportunities: "success" }))
-          })
-          .catch((err) => {
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, opportunities: "failed" }))
-            throw err
-          }),
-        fetchWithRetry("/api/portfolio/stats")
-          .then((data) => {
-            setPortfolioStats(data)
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, portfolio: "success" }))
-          })
-          .catch((err) => {
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, portfolio: "failed" }))
-            throw err
-          }),
-        fetchWithRetry("/api/auth/status")
-          .then((data) => {
-            setAuthStatus(data)
-            if (data.device_id) setAuthDeviceId(data.device_id)
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, auth: "success" }))
-          })
-          .catch((err) => {
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, auth: "failed" }))
-            throw err
-          }),
-        fetchWithRetry("/api/playbook/list")
-          .then((data) => {
-            setPlaybookStats(data)
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, playbook: "success" }))
-          })
-          .catch((err) => {
-            if (!isSilent) setLoadingSteps((s) => ({ ...s, playbook: "failed" }));
-            throw err
-          })
+        fetchWithRetry("/api/market/overview").then((data) => setMarketOverview(data)),
+        fetchWithRetry("/api/market/opportunities-v2").then((data) => setOpportunities(data)),
+        fetchWithRetry("/api/portfolio/stats").then((data) => setPortfolioStats(data)),
+        fetchWithRetry("/api/auth/status").then((data) => {
+          setAuthStatus(data)
+          if (data.device_id) setAuthDeviceId(data.device_id)
+        }),
+        fetchWithRetry("/api/playbook/list").then((data) => setPlaybookStats(data))
       ]
 
       await Promise.all(fetchPromises)
       setOfflineMode(false)
+      setBackendStatus("connected")
     } catch (e: any) {
       console.error("Connection attempt failed. Re-trying or falling back.", e)
-      if (!isSilent) {
-        setLoadingError("Unable to establish connection to the backend server. Please ensure the FastAPI uvicorn backend service is running and accessible.")
-      }
-    } finally {
-      if (timer) clearInterval(timer)
-      if (!isSilent) setLoading(false)
+      setBackendStatus("fallback")
     }
   }
 
@@ -741,7 +663,7 @@ function App() {
       // Do not auto-poll if we are in offline sandbox mode or currently loading
       const currentSandbox = window.location.search.includes("mode=sandbox");
       if (!currentSandbox && !offlineMode) {
-        loadDashboardData(false, true)
+        loadDashboardData(false)
       }
     }, 10000)
     
@@ -1043,227 +965,7 @@ function App() {
   }
 
 
-  if (loading || !marketOverview) {
-    if (loadingError && !marketOverview) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6">
-          <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col gap-6">
-            <div className="flex items-center gap-3 text-destructive">
-              <WarningCircle size={20} className="text-destructive shrink-0" weight="regular" />
-              <span className="font-bold text-sm">Workspace Connection Failed</span>
-            </div>
-            
-            <p className="text-xs text-text-muted leading-relaxed">
-              {loadingError}
-            </p>
-            
-            <div className="flex flex-col gap-2 bg-accent/30 rounded-xl p-3 border border-border/50 text-[11px] font-medium text-text-muted">
-              <div className="flex justify-between items-center">
-                <span>Market Overview API</span>
-                <span className={loadingSteps.overview === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
-                  {loadingSteps.overview === "success" ? "Connected" : loadingSteps.overview === "failed" ? "Offline" : "Checking..."}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Swing Opportunities API</span>
-                <span className={loadingSteps.opportunities === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
-                  {loadingSteps.opportunities === "success" ? "Connected" : loadingSteps.opportunities === "failed" ? "Offline" : "Checking..."}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Portfolio Stats API</span>
-                <span className={loadingSteps.portfolio === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
-                  {loadingSteps.portfolio === "success" ? "Connected" : loadingSteps.portfolio === "failed" ? "Offline" : "Checking..."}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Nubra API Sync Status</span>
-                <span className={loadingSteps.auth === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
-                  {loadingSteps.auth === "success" ? "Connected" : loadingSteps.auth === "failed" ? "Offline" : "Checking..."}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Playbook AI Vector Store</span>
-                <span className={loadingSteps.playbook === "success" ? "text-success font-bold" : "text-destructive font-bold"}>
-                  {loadingSteps.playbook === "success" ? "Connected" : loadingSteps.playbook === "failed" ? "Offline" : "Checking..."}
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex gap-3 mt-2">
-              <button
-                onClick={() => loadDashboardData(false)}
-                className="btn btn-primary btn-md flex-1 font-bold shadow-sm"
-              >
-                <ArrowsClockwise size={16} className="mr-1.5 animate-spin-slow text-current" weight="regular" />
-                Retry Connection
-              </button>
-              <button
-                onClick={() => loadDashboardData(true)}
-                className="btn btn-accent btn-md flex-1 font-bold shadow-sm"
-              >
-                Proceed Offline (Mocks)
-              </button>
-            </div>
 
-            {/* Collapsible Backend URL Config */}
-            <div className="border-t border-border/20 pt-4 flex flex-col gap-2.5 mt-2">
-              <button
-                onClick={() => setShowUrlInput(!showUrlInput)}
-                className="text-[10px] font-mono text-text-muted hover:text-foreground text-left cursor-pointer transition-colors"
-              >
-                {showUrlInput ? "▾ Hide Backend Config" : "▸ Configure Custom Backend URL"}
-              </button>
-              {showUrlInput && (
-                <div className="flex flex-col gap-2">
-                  <input
-                    type="text"
-                    value={customBackendUrl}
-                    onChange={(e) => {
-                      setCustomBackendUrl(e.target.value);
-                      localStorage.setItem("stalk_market_backend_url", e.target.value.trim());
-                    }}
-                    placeholder="https://your-backend.onrender.com or http://localhost:8000"
-                    className="bg-background border border-border/80 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-border text-foreground w-full"
-                  />
-                  <span className="text-[9px] text-text-muted leading-normal">
-                    Specify the root URL of your Python API (e.g. your Render backend or your localtunnel URL). Leave empty to use localhost/default.
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    const stepStates = Object.values(loadingSteps);
-    const successCount = stepStates.filter(s => s === "success").length;
-    const progressPercent = Math.round((successCount / stepStates.length) * 100);
-
-    const getActiveLoadingInfo = () => {
-      if (loadingSteps.overview === "pending") return "Fetching live indices from Yahoo Finance..."
-      if (loadingSteps.opportunities === "pending") return "Scanning swing setups for opportunities..."
-      if (loadingSteps.portfolio === "pending") return "Loading holdings and margin from Nubra..."
-      if (loadingSteps.auth === "pending") return "Checking Nubra session credentials validity..."
-      if (loadingSteps.playbook === "pending") return "Loading playbook vector index documents..."
-      return "Finalizing AI trading assistant workspace..."
-    }
-
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6">
-        <div className="w-full max-w-sm flex flex-col gap-6 text-center">
-          <div className="flex flex-col items-center justify-center py-2">
-            <img src="/Logo.png" alt="Stalk Market Logo" className="h-14 w-auto object-contain" />
-          </div>
-
-          <div className="bg-card/50 border border-border/40 rounded-xl p-5 flex flex-col gap-4 text-left backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-foreground/80">
-              <span>Initializing Workspace...</span>
-              <span className="font-mono text-text-muted">{progressPercent}%</span>
-            </div>
-
-            <div className="w-full bg-accent/40 h-[3px] rounded-full overflow-hidden">
-              <div 
-                className="bg-primary/80 h-full transition-all duration-300 rounded-full" 
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-
-            <div className="text-[10px] text-text-muted font-mono bg-accent/20 px-3 py-2 rounded-lg border border-border/20 mt-1">
-              <span className="text-foreground/75 block mb-0.5">Active Operation:</span>
-              {getActiveLoadingInfo()}
-            </div>
-
-            <div className="flex flex-col gap-2.5 text-xs text-text-muted mt-2 font-normal">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <div className={`h-1.5 w-1.5 rounded-full ${loadingSteps.overview === "success" ? "bg-emerald-500/80" : loadingSteps.overview === "failed" ? "bg-rose-500/80" : "bg-foreground/20 animate-pulse"}`} />
-                  Market Pulse & Indices
-                </span>
-                <span className="text-[10px] font-mono text-text-muted">
-                  {loadingSteps.overview === "success" ? "Ready" : loadingSteps.overview === "failed" ? "Failed" : "Loading..."}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <div className={`h-1.5 w-1.5 rounded-full ${loadingSteps.opportunities === "success" ? "bg-emerald-500/80" : loadingSteps.opportunities === "failed" ? "bg-rose-500/80" : "bg-foreground/20 animate-pulse"}`} />
-                  Swing Opportunity Scanner
-                </span>
-                <span className="text-[10px] font-mono text-text-muted">
-                  {loadingSteps.opportunities === "success" ? "Ready" : loadingSteps.opportunities === "failed" ? "Failed" : "Loading..."}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <div className={`h-1.5 w-1.5 rounded-full ${loadingSteps.portfolio === "success" ? "bg-emerald-500/80" : loadingSteps.portfolio === "failed" ? "bg-rose-500/80" : "bg-foreground/20 animate-pulse"}`} />
-                  Portfolio Statistics
-                </span>
-                <span className="text-[10px] font-mono text-text-muted">
-                  {loadingSteps.portfolio === "success" ? "Ready" : loadingSteps.portfolio === "failed" ? "Failed" : "Loading..."}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <div className={`h-1.5 w-1.5 rounded-full ${loadingSteps.auth === "success" ? "bg-emerald-500/80" : loadingSteps.auth === "failed" ? "bg-rose-500/80" : "bg-foreground/20 animate-pulse"}`} />
-                  Nubra API Integration
-                </span>
-                <span className="text-[10px] font-mono text-text-muted">
-                  {loadingSteps.auth === "success" ? "Ready" : loadingSteps.auth === "failed" ? "Failed" : "Loading..."}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <div className={`h-1.5 w-1.5 rounded-full ${loadingSteps.playbook === "success" ? "bg-emerald-500/80" : loadingSteps.playbook === "failed" ? "bg-rose-500/80" : "bg-foreground/20 animate-pulse"}`} />
-                  Playbook Strategy DB
-                </span>
-                <span className="text-[10px] font-mono text-text-muted">
-                  {loadingSteps.playbook === "success" ? "Ready" : loadingSteps.playbook === "failed" ? "Failed" : "Loading..."}
-                </span>
-              </div>
-            </div>
-
-            <div className="border-t border-border/30 pt-2.5 flex flex-col gap-2">
-              <div className="flex justify-between items-center text-[10px] text-text-muted/70 font-mono">
-                <span>Time: {loadingElapsedTime}s</span>
-                <span>Estimated: ~1.5s</span>
-              </div>
-              <button 
-                onClick={() => loadDashboardData(true)}
-                className="w-full text-center py-1.5 border border-border/30 rounded-lg text-[10px] font-mono text-text-muted hover:text-foreground hover:bg-accent/20 transition-all cursor-pointer"
-              >
-                Skip connection & launch Sandbox Mode
-              </button>
-            </div>
-
-            {/* Collapsible Backend URL Config */}
-            <div className="border-t border-border/20 pt-2.5 flex flex-col gap-2 mt-1">
-              <button
-                onClick={() => setShowUrlInput(!showUrlInput)}
-                className="text-[9px] font-mono text-text-muted hover:text-foreground text-left cursor-pointer transition-colors"
-              >
-                {showUrlInput ? "▾ Hide Backend Config" : "▸ Configure Custom Backend URL"}
-              </button>
-              {showUrlInput && (
-                <div className="flex flex-col gap-2 mt-1">
-                  <input
-                    type="text"
-                    value={customBackendUrl}
-                    onChange={(e) => {
-                      setCustomBackendUrl(e.target.value);
-                      localStorage.setItem("stalk_market_backend_url", e.target.value.trim());
-                    }}
-                    placeholder="https://your-backend.onrender.com or http://localhost:8000"
-                    className="bg-background border border-border/80 rounded-xl px-2.5 py-1.5 text-[11px] font-mono focus:outline-none focus:border-border text-foreground w-full"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="app-shell flex h-screen overflow-hidden bg-background">
@@ -1532,8 +1234,38 @@ function App() {
             <span>Search stock (e.g. HFCL)...</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Header controls */}
+          <div className="flex items-center gap-3">
+            {/* Backend Connection Indicator Badge */}
+            {backendStatus === "connecting" && (
+              <div 
+                className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-medium select-none transition-all duration-300"
+                title="Render backend is waking up in the background. Operating on instant local data..."
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+                </span>
+                <span>Connecting to backend...</span>
+              </div>
+            )}
+            {backendStatus === "connected" && (
+              <div 
+                className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-medium select-none transition-all duration-300"
+                title="Connected live to FastAPI backend engine"
+              >
+                <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
+                <span>Backend connected</span>
+              </div>
+            )}
+            {backendStatus === "fallback" && (
+              <div 
+                className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-text-muted text-xs font-medium select-none transition-all duration-300"
+                title="Operating on local strategy engine data"
+              >
+                <span className="h-2 w-2 rounded-full bg-neutral-400"></span>
+                <span>Offline fallback</span>
+              </div>
+            )}
           </div>
         </header>
 
